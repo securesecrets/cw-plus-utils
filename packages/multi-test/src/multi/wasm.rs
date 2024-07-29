@@ -37,7 +37,9 @@ use cosmwasm_std::{
 use nanoid::nanoid;
 use prost::Message;
 use schemars::JsonSchema;
-use secret_utils::parse_execute_response_data;
+use secret_utils::{
+    parse_execute_response_data, parse_instantiate_response_data, parse_reply_execute_data,
+};
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
@@ -572,12 +574,7 @@ where
         // call reply if meaningful
         if let Ok(mut r) = res {
             if matches!(reply_on, ReplyOn::Always | ReplyOn::Success) {
-                let data: Option<Binary> = if let Some(b) = r.data {
-                    let parsed = parse_execute_response_data(b.as_slice())?;
-                    parsed.data
-                } else {
-                    None
-                };
+                let data: Option<Binary> = if let Some(b) = r.data { Some(b) } else { None };
 
                 let reply = Reply {
                     id,
