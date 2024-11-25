@@ -579,8 +579,7 @@ where
                     }),
                 };
                 // do reply and combine it with the original response
-                let reply_res =
-                    self._reply(api, router, storage, block, contract.clone(), reply)?;
+                let reply_res = self.reply(api, router, storage, block, contract, reply)?;
                 // override data
                 r.data = reply_res.data;
                 // append the events
@@ -589,7 +588,6 @@ where
                 // reply is not called, no data should be rerturned
                 r.data = None;
             }
-
             Ok(r)
         } else if let Err(e) = res {
             if matches!(reply_on, ReplyOn::Always | ReplyOn::Error) {
@@ -597,7 +595,7 @@ where
                     id,
                     result: SubMsgResult::Err(e.to_string()),
                 };
-                self._reply(api, router, storage, block, contract, reply)
+                self.reply(api, router, storage, block, contract, reply)
             } else {
                 Err(e)
             }
@@ -606,7 +604,7 @@ where
         }
     }
 
-    fn _reply(
+    fn reply(
         &self,
         api: &dyn Api,
         router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
