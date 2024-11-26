@@ -5,7 +5,7 @@ use cosmwasm_std::{
     SubMsgResponse, WasmMsg,
 };
 use schemars::JsonSchema;
-use secret_utils::{parse_execute_response_data, parse_instantiate_response_data};
+use secret_utils::parse_execute_response_data;
 use serde::Serialize;
 
 use anyhow::Result as AnyResult;

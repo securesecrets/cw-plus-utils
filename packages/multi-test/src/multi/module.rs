@@ -1,11 +1,10 @@
 use std::marker::PhantomData;
 
 use anyhow::{bail, Result as AnyResult};
-use cosmwasm_std::{Addr, Api, Binary, BlockInfo, CustomQuery, Querier, Storage};
+use cosmwasm_std::{Addr, Api, Binary, BlockInfo, CustomMsg, CustomQuery, Querier, Storage};
 
 use crate::app::CosmosRouter;
 use crate::AppResponse;
-use schemars::JsonSchema;
 use serde::de::DeserializeOwned;
 
 pub trait Module {
@@ -25,7 +24,7 @@ pub trait Module {
         msg: Self::ExecT,
     ) -> AnyResult<AppResponse>
     where
-        ExecC: std::fmt::Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
+        ExecC: CustomMsg + DeserializeOwned + 'static,
         QueryC: CustomQuery + DeserializeOwned + 'static;
 
     /// sudo runs privileged actions, like minting tokens, or governance proposals.
@@ -42,7 +41,7 @@ pub trait Module {
         msg: Self::SudoT,
     ) -> AnyResult<AppResponse>
     where
-        ExecC: std::fmt::Debug + Clone + PartialEq + JsonSchema + DeserializeOwned + 'static,
+        ExecC: CustomMsg + DeserializeOwned + 'static,
         QueryC: CustomQuery + DeserializeOwned + 'static;
 
     fn query(

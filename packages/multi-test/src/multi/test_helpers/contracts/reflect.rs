@@ -7,11 +7,11 @@ use secret_storage_plus::Map;
 
 use crate::contracts::{Contract, ContractWrapper};
 use crate::test_helpers::contracts::payout;
-use crate::test_helpers::{CustomMsg, EmptyMsg, COUNT};
+use crate::test_helpers::{CustomHelperMsg, EmptyMsg, COUNT};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Message {
-    pub messages: Vec<SubMsg<CustomMsg>>,
+    pub messages: Vec<SubMsg<CustomHelperMsg>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -27,7 +27,7 @@ fn instantiate(
     _env: Env,
     _info: MessageInfo,
     _msg: EmptyMsg,
-) -> Result<Response<CustomMsg>, StdError> {
+) -> Result<Response<CustomHelperMsg>, StdError> {
     COUNT.save(deps.storage, &0)?;
     Ok(Response::default())
 }
@@ -37,7 +37,7 @@ fn execute(
     _env: Env,
     _info: MessageInfo,
     msg: Message,
-) -> Result<Response<CustomMsg>, StdError> {
+) -> Result<Response<CustomHelperMsg>, StdError> {
     COUNT.update::<_, StdError>(deps.storage, |old| Ok(old + 1))?;
 
     Ok(Response::new().add_submessages(msg.messages))
@@ -57,7 +57,7 @@ fn query(deps: Deps, _env: Env, msg: QueryMsg) -> Result<Binary, StdError> {
     }
 }
 
-fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response<CustomMsg>, StdError> {
+fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response<CustomHelperMsg>, StdError> {
     REFLECT.save(deps.storage, msg.id, &msg)?;
     // add custom event here to test
     let event = Event::new("custom")
@@ -66,7 +66,7 @@ fn reply(deps: DepsMut, _env: Env, msg: Reply) -> Result<Response<CustomMsg>, St
     Ok(Response::new().add_event(event))
 }
 
-pub fn contract() -> Box<dyn Contract<CustomMsg>> {
+pub fn contract() -> Box<dyn Contract<CustomHelperMsg>> {
     let contract = ContractWrapper::new(execute, instantiate, query).with_reply(reply);
     Box::new(contract)
 }

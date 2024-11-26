@@ -37,7 +37,6 @@ use cosmwasm_std::{
 use nanoid::nanoid;
 use prost::Message;
 use schemars::JsonSchema;
-use secret_utils::parse_execute_response_data;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
@@ -572,23 +571,15 @@ where
         // call reply if meaningful
         if let Ok(mut r) = res {
             if matches!(reply_on, ReplyOn::Always | ReplyOn::Success) {
-                let data: Option<Binary> = if let Some(b) = r.data {
-                    let parsed = parse_execute_response_data(b.as_slice())?;
-                    parsed.data
-                } else {
-                    None
-                };
-
                 let reply = Reply {
                     id,
                     result: SubMsgResult::Ok(SubMsgResponse {
                         events: r.events.clone(),
-                        data,
+                        data: r.data,
                     }),
                 };
                 // do reply and combine it with the original response
-                let reply_res =
-                    self._reply(api, router, storage, block, contract.clone(), reply)?;
+                let reply_res = self.reply(api, router, storage, block, contract, reply)?;
                 // override data
                 r.data = reply_res.data;
                 // append the events
@@ -597,7 +588,6 @@ where
                 // reply is not called, no data should be rerturned
                 r.data = None;
             }
-
             Ok(r)
         } else if let Err(e) = res {
             if matches!(reply_on, ReplyOn::Always | ReplyOn::Error) {
@@ -605,7 +595,7 @@ where
                     id,
                     result: SubMsgResult::Err(e.to_string()),
                 };
-                self._reply(api, router, storage, block, contract, reply)
+                self.reply(api, router, storage, block, contract, reply)
             } else {
                 Err(e)
             }
@@ -614,7 +604,7 @@ where
         }
     }
 
-    fn _reply(
+    fn reply(
         &self,
         api: &dyn Api,
         router: &dyn CosmosRouter<ExecC = ExecC, QueryC = QueryC>,
