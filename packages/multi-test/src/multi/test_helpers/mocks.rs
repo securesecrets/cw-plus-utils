@@ -1,7 +1,8 @@
 use cosmwasm_std::{Empty, GovMsg, IbcMsg, IbcQuery};
 
 use crate::{
-    BankKeeper, DistributionKeeper, FailingModule, Router, Staking, StakingKeeper, WasmKeeper,
+    BankKeeper, DistributionKeeper, FailingModule, Router, StakingKeeper, StargateFailing,
+    WasmKeeper,
 };
 
 pub type BasicRouter<ExecC = Empty, QueryC = Empty> = Router<
@@ -12,6 +13,7 @@ pub type BasicRouter<ExecC = Empty, QueryC = Empty> = Router<
     DistributionKeeper,
     FailingModule<IbcMsg, IbcQuery, Empty>,
     FailingModule<GovMsg, Empty, Empty>,
+    StargateFailing,
 >;
 
 pub fn mock_router() -> BasicRouter {
@@ -23,5 +25,6 @@ pub fn mock_router() -> BasicRouter {
         distribution: DistributionKeeper::new(),
         ibc: FailingModule::new(),
         gov: FailingModule::new(),
+        stargate: StargateFailing,
     }
 }

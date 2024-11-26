@@ -1,4 +1,5 @@
 #![cfg(test)]
+use cosmwasm_std::CustomMsg;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
@@ -11,11 +12,19 @@ pub mod mocks;
 pub struct EmptyMsg {}
 
 /// This is just a demo place so we can test custom message handling
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema, PartialEq, Default)]
 #[serde(rename = "snake_case")]
-pub enum CustomMsg {
-    SetName { name: String },
-    SetAge { age: u32 },
+pub enum CustomHelperMsg {
+    SetName {
+        name: String,
+    },
+    SetAge {
+        age: u32,
+    },
+    #[default]
+    NoOp,
 }
+
+impl CustomMsg for CustomHelperMsg {}
 
 const COUNT: Item<u32> = Item::new("count");
