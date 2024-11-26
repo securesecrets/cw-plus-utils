@@ -37,13 +37,29 @@ pub trait Stargate {
     fn query_stargate(
         &self,
         _api: &dyn Api,
-        _storage: &dyn Storage,
+        storage: &dyn Storage,
         _querier: &dyn Querier,
         _block: &BlockInfo,
         path: String,
         data: Binary,
     ) -> AnyResult<Binary> {
-        bail!("Unexpected stargate query: path={}, data={}", path, data)
+        match path.as_str() {
+            "/secret.compute.v1beta1.Query/CodeHashByContractAddress" => {
+                let deserialized = Bufany::deserialize(data.as_slice())?;
+
+                if let Some(contract_address) = deserialized.string(1) {
+                    let contract = CONTRACTS.load(
+                        &prefixed_read(storage, NAMESPACE_WASM),
+                        &Addr::unchecked(contract_address),
+                    )?;
+
+                    Ok(Binary(contract.code_hash.into()))
+                } else {
+                    bail!("Failed to decode Protobuf message: String not found for field number 1")
+                }
+            }
+            _ => bail!("Unexpected stargate query: path={}, data={}", path, data),
+        }
     }
 }
 
